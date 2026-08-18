@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CineGraph — Recommendations Through Friendship</title>
+<meta name="description" content="A movie recommendation explorer built on a friendship graph, powered by CognoDB." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="reel-strip" aria-hidden="true"></div>
+
+  <header class="marquee">
+    <div class="marquee-inner">
+      <div class="brand">
+        <span class="brand-mark">◎</span>
+        <div>
+          <h1>CineGraph</h1>
+          <p class="tagline">Recommendations, traced through who you know</p>
+        </div>
+      </div>
+      <div id="db-status" class="db-status" role="status" aria-live="polite">
+        <span class="dot"></span>
+        <span class="db-status-text">Checking CognoDB…</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="reel-strip" aria-hidden="true"></div>
+
+  <div id="offline-banner" class="offline-banner hidden" role="alert">
+    CognoDB is unreachable right now. CineGraph will pick back up automatically once the database responds.
+  </div>
+
+  <main class="app-shell">
+
+    <section class="viewer-select" aria-label="Choose who you're viewing as">
+      <span class="viewer-label">Viewing as</span>
+      <div id="viewer-tickets" class="viewer-tickets">
+        <div class="skeleton-row">
+          <div class="skeleton skeleton-chip"></div>
+          <div class="skeleton skeleton-chip"></div>
+          <div class="skeleton skeleton-chip"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist" aria-label="CineGraph sections">
+      <button class="tab-btn is-active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+      <button class="tab-btn" data-tab="recommendations" role="tab" aria-selected="false">Recommendations</button>
+      <button class="tab-btn" data-tab="discover" role="tab" aria-selected="false">Discover People</button>
+      <button class="tab-btn" data-tab="search" role="tab" aria-selected="false">Movie Search</button>
+      <button class="tab-btn" data-tab="graph" role="tab" aria-selected="false">Connection Graph</button>
+      <button class="tab-btn" data-tab="degrees" role="tab" aria-selected="false">Six Degrees</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <section class="tab-panel is-active" id="panel-overview" role="tabpanel">
+      <div class="grid grid-3">
+        <div class="card" id="profile-card">
+          <h2 class="card-title">Profile</h2>
+          <div class="card-body" id="profile-body"><div class="skeleton skeleton-line"></div></div>
+        </div>
+        <div class="card" id="friends-card">
+          <h2 class="card-title">Friends</h2>
+          <div class="card-body" id="friends-body"><div class="skeleton skeleton-line"></div></div>
+        </div>
+        <div class="card" id="ratings-card">
+          <h2 class="card-title">Ratings given</h2>
+          <div class="card-body" id="ratings-body"><div class="skeleton skeleton-line"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECOMMENDATIONS -->
+    <section class="tab-panel" id="panel-recommendations" role="tabpanel">
+      <div class="section-head">
+        <h2>Recommended for you</h2>
+        <p class="section-sub">Movies your friends — and friends of friends — rated 4 stars or higher, that you haven't seen yet.</p>
+      </div>
+      <div id="recommendations-body" class="grid grid-cards"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
+    </section>
+
+    <!-- DISCOVER PEOPLE -->
+    <section class="tab-panel" id="panel-discover" role="tabpanel">
+      <div class="section-head">
+        <h2>People you may know</h2>
+        <p class="section-sub">Friends of your friends who aren't in your circle yet.</p>
+      </div>
+      <div id="discover-body" class="grid grid-cards"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
+    </section>
+
+    <!-- MOVIE SEARCH -->
+    <section class="tab-panel" id="panel-search" role="tabpanel">
+      <div class="section-head">
+        <h2>Find a movie</h2>
+        <p class="section-sub">Search the catalog and see who in the network has rated it.</p>
+      </div>
+      <form id="search-form" class="search-form" role="search">
+        <input type="text" id="search-input" placeholder="Search by title…" autocomplete="off" aria-label="Search movies by title" />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+      <div id="search-body" class="grid grid-cards"></div>
+    </section>
+
+    <!-- CONNECTION GRAPH -->
+    <section class="tab-panel" id="panel-graph" role="tabpanel">
+      <div class="section-head">
+        <h2>Connection graph</h2>
+        <p class="section-sub">Gold lines are friendships. Red lines are ratings — thicker means a higher rating.</p>
+      </div>
+      <div class="graph-frame">
+        <div class="reel-strip reel-strip-thin" aria-hidden="true"></div>
+        <div id="graph-canvas" class="graph-canvas"></div>
+        <div class="reel-strip reel-strip-thin" aria-hidden="true"></div>
+      </div>
+      <div class="legend">
+        <span><i class="legend-dot legend-dot-user"></i> Person</span>
+        <span><i class="legend-dot legend-dot-movie"></i> Movie</span>
+        <span><i class="legend-line legend-line-friend"></i> Friendship</span>
+        <span><i class="legend-line legend-line-rated"></i> Rated</span>
+      </div>
+    </section>
+
+    <!-- SIX DEGREES -->
+    <section class="tab-panel" id="panel-degrees" role="tabpanel">
+      <div class="section-head">
+        <h2>Six degrees</h2>
+        <p class="section-sub">Find the shortest chain of friendships between any two people in the network.</p>
+      </div>
+      <form id="degrees-form" class="degrees-form">
+        <label class="field">
+          <span>From</span>
+          <select id="degrees-from" required></select>
+        </label>
+        <label class="field">
+          <span>To</span>
+          <select id="degrees-to" required></select>
+        </label>
+        <button type="submit" class="btn btn-primary">Find connection</button>
+      </form>
+      <div id="degrees-body"></div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="reel-strip reel-strip-thin" aria-hidden="true"></div>
+    <p>CineGraph — a graph-database demo built on CognoDB.</p>
+  </footer>
+
+  <template id="tpl-user-chip">
+    <button class="user-chip" type="button">
+      <span class="user-chip-initials"></span>
+      <span class="user-chip-name"></span>
+    </button>
+  </template>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
