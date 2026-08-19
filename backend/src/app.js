@@ -46,14 +46,26 @@ app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Not found.' });
 });
 
-// Serve the static frontend (index.html, css, js) from the sibling folder.
-app.use(express.static(path.join(__dirname, '..', '..', 'frontend')));
+// --------------------------------------------------
+// Serve the frontend
+// --------------------------------------------------
 
-// Centralized error handler for anything a route forwards via next(err).
+const frontendPath = path.join(process.cwd(), '..', 'frontend');
+
+console.log('Frontend path:', frontendPath);
+
+app.use(express.static(frontendPath));
+
+// --------------------------------------------------
+// Centralized error handler
+// --------------------------------------------------
+
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Something went wrong on our end.' });
+  res.status(500).json({
+    error: 'Something went wrong on our end.'
+  });
 });
 
 module.exports = app;
