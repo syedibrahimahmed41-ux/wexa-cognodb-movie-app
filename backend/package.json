@@ -1,29 +1,22 @@
 {
-  "name": "wrappy",
-  "version": "1.0.2",
-  "description": "Callback wrapping utility",
-  "main": "wrappy.js",
-  "files": [
-    "wrappy.js"
-  ],
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "tap": "^2.3.1"
-  },
+  "name": "cinegraph-backend",
+  "version": "1.0.0",
+  "description": "CineGraph API - a friend-network movie recommendation service backed by CognoDB (graph database)",
+  "private": true,
+  "main": "server.js",
   "scripts": {
-    "test": "tap --coverage test/*.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seed.js",
+    "import:movies": "node import-movies.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/npm/wrappy"
+  "engines": {
+    "node": ">=18"
   },
-  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/npm/wrappy/issues"
-  },
-  "homepage": "https://github.com/npm/wrappy"
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "neo4j-driver": "^6.2.0"
+  }
 }
