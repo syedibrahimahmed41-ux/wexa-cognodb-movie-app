@@ -14,10 +14,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check always answers, even if the DB is down, so the frontend
-// can poll it to show a "database unreachable" banner.
+// Health check
 app.get('/api/health', (req, res) => {
   const ok = isConnected();
+
   res.status(ok ? 200 : 503).json({
     status: ok ? 'ok' : 'unavailable',
     database: 'CognoDB',
@@ -25,17 +25,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Every other /api route fails fast with a friendly message if we already
-// know CognoDB is unreachable, instead of letting each query hang/timeout.
+// Database protection
 app.use('/api', (req, res, next) => {
   if (!isConnected()) {
     return res.status(503).json({
       error: 'The database is temporarily unreachable. Please try again shortly.'
     });
   }
+
   next();
 });
 
+// API routes
 app.use('/api/users', usersRouter);
 app.use('/api/movies', moviesRouter);
 app.use('/api/recommendations', recommendationsRouter);
@@ -43,26 +44,32 @@ app.use('/api/graph', graphRouter);
 app.use('/api/path', pathRouter);
 
 app.use('/api', (req, res) => {
-  res.status(404).json({ error: 'Not found.' });
+  res.status(404).json({
+    error: 'Not found.'
+  });
 });
 
 // --------------------------------------------------
-// Serve the frontend
+// FRONTEND
 // --------------------------------------------------
 
-const frontendPath = path.join(process.cwd(), '..', 'frontend');
+const frontendPath = path.resolve(__dirname, '../../frontend');
 
-console.log('Frontend path:', frontendPath);
+console.log('=================================');
+console.log('Frontend directory:', frontendPath);
+console.log('=================================');
 
 app.use(express.static(frontendPath));
 
-// --------------------------------------------------
-// Centralized error handler
-// --------------------------------------------------
+// Send index.html for the main website
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
-// eslint-disable-next-line no-unused-vars
+// Centralized error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
+
   res.status(500).json({
     error: 'Something went wrong on our end.'
   });
