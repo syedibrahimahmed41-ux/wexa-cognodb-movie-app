@@ -36,8 +36,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api', (req, res, next) => {
   if (!isConnected()) {
     return res.status(503).json({
-      error:
-        'The database is temporarily unreachable. Please try again shortly.'
+      error: 'The database is temporarily unreachable. Please try again shortly.'
     });
   }
 
@@ -64,35 +63,29 @@ app.use('/api', (req, res) => {
    FRONTEND
 ========================= */
 
-// backend/src/app.js
-// frontend is two levels above this file
+// Actual structure:
+//
+// project/
+// ├── backend/
+// │   └── src/
+// │       └── app.js
+// └── frontend/
+//     ├── index.html
+//     ├── style.css
+//     └── app.js
 
 const frontendPath = path.resolve(__dirname, '../../frontend');
 
-console.log('=================================');
 console.log('Frontend path:', frontendPath);
-console.log('=================================');
 
-// Serve CSS, JavaScript, images, etc.
-app.use(
-  express.static(frontendPath, {
-    index: 'index.html'
-  })
-);
+app.use(express.static(frontendPath));
 
-// Explicitly serve the homepage
+/* =========================
+   HOMEPAGE
+========================= */
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
-// Explicit CSS route
-app.get('/css/style.css', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'css', 'style.css'));
-});
-
-// Explicit JavaScript route
-app.get('/js/app.js', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'js', 'app.js'));
 });
 
 /* =========================
